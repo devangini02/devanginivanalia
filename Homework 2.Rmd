@@ -1,0 +1,83 @@
+---
+title: "Homework_2"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-01-30"
+---
+
+```{r setup, include=FALSE}
+# Load necessary library
+library(ggplot2)
+
+# Step 1: Generate Sample Data
+set.seed(123) # For reproducibility
+n <- 100
+W <- runif(n, -2, 2) # Random uniform data for W
+Y <- 2 + 3 * W - 1.5 * W^2 + 2 * W^3 + rnorm(n, sd=1) # Quadratic relationship with noise
+
+# Step 2: Fit Models
+# a) Linear Model
+model_a <- lm(Y ~ W)
+
+# b) Quadratic Model
+model_b <- lm(Y ~ W + I(W^2))
+
+# c) Cubic Model
+model_c <- lm(Y ~ W + I(W^2) + I(W^3))
+
+# Step 3: Calculate In-Sample Error (MSE)
+mse <- function(model, Y) {
+  mean((fitted(model) - Y)^2)
+}
+
+mse_a <- mse(model_a, Y)
+mse_b <- mse(model_b, Y)
+mse_c <- mse(model_c, Y)
+
+# Print the MSE for each model
+cat("MSE for model a):", mse_a, "\n")
+cat("MSE for model b):", mse_b, "\n")
+cat("MSE for model c):", mse_c, "\n") 
+```
+
+From this we can see that the cubic model has the lowest MSE so it is the best one.
+The approxmination error is concerned with how well the model approximates the true function
+The cubic function in this case provides a better approximation since the MSE is the lowest. 
+
+```{r}
+# Step 4: Predict and Evaluate for a New Individual
+# Example new individual
+new_W <- 1.5
+
+# Predict using each model
+predict_a <- predict(model_a, newdata = data.frame(W = new_W))
+predict_b <- predict(model_b, newdata = data.frame(W = new_W))
+predict_c <- predict(model_c, newdata = data.frame(W = new_W))
+
+# Print predictions
+cat("Prediction for new W (model a):", predict_a, "\n")
+cat("Prediction for new W (model b):", predict_b, "\n")
+cat("Prediction for new W (model c):", predict_c, "\n")
+```
+
+From the predictions we can see that the cubic model predicts the best for this new individual.
+
+Go through the slides, we need to understand the difference between the different error measurements. 
+
+E[(y_i - phi_n(w)'/beta)^2] = E[(y_i - phi_n(w))^2] + #prediction error
+E[(phi_n(w) - phi_n(w)'/beta)^2] + #approximation error - in-sample error
+E[(phi_n(w)'/beta_0 - phi_n(w)'/beta)^2] #squared bias due to penalization
+
+Theta_0 is the estimator of the true function. The approximation error is the difference between the true function and the estimate. The expected squared prediction error for a new individual is the expected value of the squared difference between the true value and the predicted value for a new individual.
+
+We need to formalize the proof.  
+
+Question 2 
+The in-sample error is the sum of squared residuals from the model. In this case, the cubic model has the lowest in-sample error; however, the added complexity may overfit the model. As the complexity of the model increases, the model's ability to fit the data is improved. We need to consider the bias-variance tradeoff in the model. We can use AIC, BIC to help us determine the best model.
+
+Question 3
+The model that minimizes the approximation error in the training data doesn't necessarily minimize the expected squared prediction error for a new individual. Minimizing the approximation error in the training data, we fit the model as closely as possible to the training data so a more complex model (like model C) might fit the training data well but not generalize well to new data due to overfitting. 
+
+Whereas the expected squared prediction error for a new individual is concerned with how well the model performs on data it has not seen before. The key is to find a balcance between the bias and variance of the model and avoid overfitting. 
+
